@@ -7,7 +7,17 @@ const generateToken = (id) => {
 
 exports.register = async (req, res) => {
   try {
+    console.log('Registration request:', req.body);
     const { name, email, password, role, department } = req.body;
+
+    // Validation
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    if (role === 'staff' && !department) {
+      return res.status(400).json({ message: 'Department is required for staff' });
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -25,6 +35,7 @@ exports.register = async (req, res) => {
       token: generateToken(user._id)
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: error.message });
   }
 };
